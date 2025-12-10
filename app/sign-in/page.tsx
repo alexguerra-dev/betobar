@@ -152,7 +152,7 @@ export default function SignInBookPage() {
                         onClick={() => setShowForm(!showForm)}
                         className="bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors"
                     >
-                        {showForm ? 'Cancel' : '+ Sign-In'}
+                        {showForm ? 'Cancel' : '+'}
                     </button>
                 </div>
 
