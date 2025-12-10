@@ -1,31 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { SignIn } from '@/types'
 
-// In a real app, this would be stored in a database
-const initialSignIns: SignIn[] = [
-    {
-        id: '1',
-        guestName: 'John Doe',
-        drinkName: 'Old Fashioned',
-        rating: 5,
-        comment: "Absolutely perfect! Best cocktail I've had in a while.",
-        date: '2024-12-05T18:30:00Z',
-    },
-    {
-        id: '2',
-        guestName: 'Jane Smith',
-        drinkName: 'Mojito',
-        rating: 4,
-        comment: 'Very refreshing, would definitely have again!',
-        date: '2024-12-06T19:15:00Z',
-    },
-]
-
 export default function SignInBookPage() {
-    const [signIns, setSignIns] = useState<SignIn[]>(initialSignIns)
+    const [signIns, setSignIns] = useState<SignIn[]>([])
     const [showForm, setShowForm] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [submitting, setSubmitting] = useState(false)
+    const [error, setError] = useState<string | null>(null)
     const [formData, setFormData] = useState({
         guestName: '',
         drinkName: '',
@@ -33,23 +16,64 @@ export default function SignInBookPage() {
         comment: '',
     })
 
-    const handleSubmit = (e: React.FormEvent) => {
+    // Fetch sign-ins on mount
+    useEffect(() => {
+        fetchSignIns()
+    }, [])
+
+    const fetchSignIns = async () => {
+        try {
+            setLoading(true)
+            setError(null)
+            const response = await fetch('/api/sign-ins')
+            if (!response.ok) throw new Error('Failed to fetch sign-ins')
+            const data = await response.json()
+            setSignIns(data)
+        } catch (err) {
+            setError('Failed to load sign-ins. Please try again.')
+            console.error('Error fetching sign-ins:', err)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        const newSignIn: SignIn = {
-            id: Date.now().toString(),
-            ...formData,
-            date: new Date().toISOString(),
-        }
+        try {
+            setSubmitting(true)
+            setError(null)
 
-        setSignIns([newSignIn, ...signIns])
-        setFormData({
-            guestName: '',
-            drinkName: '',
-            rating: 0,
-            comment: '',
-        })
-        setShowForm(false)
+            const response = await fetch('/api/sign-ins', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            })
+
+            if (!response.ok) {
+                const errorData = await response.json()
+                throw new Error(errorData.error || 'Failed to submit sign-in')
+            }
+
+            const newSignIn = await response.json()
+            setSignIns([newSignIn, ...signIns])
+            setFormData({
+                guestName: '',
+                drinkName: '',
+                rating: 0,
+                comment: '',
+            })
+            setShowForm(false)
+        } catch (err) {
+            setError(
+                err instanceof Error ? err.message : 'Failed to submit sign-in',
+            )
+            console.error('Error submitting sign-in:', err)
+        } finally {
+            setSubmitting(false)
+        }
     }
 
     const formatDate = (dateString: string) => {
@@ -109,6 +133,12 @@ export default function SignInBookPage() {
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
             <div className="max-w-4xl mx-auto">
+                {error && (
+                    <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                        {error}
+                    </div>
+                )}
+
                 <div className="flex justify-between items-center mb-8">
                     <div>
                         <h1 className="text-4xl font-bold text-gray-900 mb-2">
@@ -150,7 +180,7 @@ export default function SignInBookPage() {
                                             guestName: e.target.value,
                                         })
                                     }
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-gray-900 placeholder-gray-500"
                                     placeholder="Enter your name"
                                 />
                             </div>
@@ -173,7 +203,7 @@ export default function SignInBookPage() {
                                             drinkName: e.target.value,
                                         })
                                     }
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-gray-900 placeholder-gray-500"
                                     placeholder="Enter the drink name"
                                 />
                             </div>
@@ -203,16 +233,19 @@ export default function SignInBookPage() {
                                         })
                                     }
                                     rows={4}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-gray-900 placeholder-gray-500"
                                     placeholder="Share your thoughts about the drink..."
                                 />
                             </div>
 
                             <button
                                 type="submit"
-                                className="w-full bg-amber-600 text-white py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+                                disabled={submitting}
+                                className="w-full bg-amber-600 text-white py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                             >
-                                Submit Sign-In
+                                {submitting
+                                    ? 'Submitting...'
+                                    : 'Submit Sign-In'}
                             </button>
                         </form>
                     </div>
@@ -222,7 +255,11 @@ export default function SignInBookPage() {
                     <h2 className="text-2xl font-semibold text-gray-900">
                         Past Sign-Ins
                     </h2>
-                    {signIns.length === 0 ? (
+                    {loading ? (
+                        <div className="bg-white rounded-lg shadow-md p-8 text-center text-gray-500">
+                            Loading sign-ins...
+                        </div>
+                    ) : signIns.length === 0 ? (
                         <div className="bg-white rounded-lg shadow-md p-8 text-center text-gray-500">
                             No sign-ins yet. Be the first to share your
                             experience!
