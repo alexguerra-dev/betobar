@@ -111,3 +111,5 @@ The app will be live at your Vercel URL!
 - [ ] Photo uploads for drinks
 - [ ] Search and filter functionality
 - [ ] Favorite recipes
+- [ ] Icons for glassware type
+- [ ] Shopping List Maker
