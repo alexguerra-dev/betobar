@@ -113,4 +113,24 @@ export const recipes: Recipe[] = [
             'Garnish with cherry and orange slice',
         ],
     },
+    {
+        id: '7',
+        name: 'Cosmopolitan',
+        description:
+            'A stylish cocktail with vodka, triple sec, and cranberry juice',
+        glassType: 'Martini glass',
+        ingredients: [
+            '1.5 oz Vodka',
+            '1 oz Triple sec',
+            '0.5 oz Lime juice',
+            '1 oz Cranberry juice',
+            'Lime twist for garnish',
+        ],
+        instructions: [
+            'Combine all ingredients in shaker with ice',
+            'Shake well',
+            'Strain into chilled martini glass',
+            'Garnish with lime twist',
+        ],
+    },
 ]

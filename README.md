@@ -113,3 +113,4 @@ The app will be live at your Vercel URL!
 - [ ] Favorite recipes
 - [ ] Icons for glassware type
 - [ ] Shopping List Maker
+- [ ] On sign-ins add a _user also likes_ field
