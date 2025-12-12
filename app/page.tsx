@@ -9,7 +9,7 @@ export default function Home() {
                         Welcome to BetoBar
                     </h1>
                     <p className="text-2xl text-amber-300 mb-2">
-                        Your Home Bar Experience
+                        The Home Bar Experience
                     </p>
                     <p className="text-gray-300 text-lg">
                         Explore our inventory, discover cocktail recipes, and
